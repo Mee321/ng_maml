@@ -163,15 +163,14 @@ def train_single_task_newton(model, task_lr, loss_fn, dataloaders, params):
     grads = torch.autograd.grad(loss, model.parameters(), create_graph=True)
     loss_grad = torch.cat([grad.view(-1) for grad in grads]).data
 
-    def Hvp(gradients, v, damping=1e-1):
-        flat_grad = torch.cat([grad.view(-1) for grad in gradients])
-        gv = (flat_grad * Variable(v)).sum()
+    def Hvp(v, damping=1e-1):
+        gv = (loss_grad * Variable(v)).sum()
         Hv = torch.autograd.grad(gv, model.parameters())
         flat_Hv = torch.cat([Hv.contiguous().view(-1) for grad in Hv]).data
 
         return flat_Hv + v * damping
 
-    newton_step = unflatten(conjugate_gradients(Hvp, loss_grad, 10), model.parameters())
+    newton_step = utils.unflatten(conjugate_gradients(Hvp, loss_grad, 10), model.parameters())
 
     # performs updates using calculated step
     # we manually compute adpated parameters since optimizer.step() operates in-place
@@ -282,6 +281,192 @@ def train_and_evaluate(model,
             meta_optimizer.zero_grad()
             meta_loss.backward()
             meta_optimizer.step()
+
+            # Evaluate model on new task
+            # Evaluate on train and test dataset given a number of tasks (params.num_steps)
+            if (episode + 1) % params.save_summary_steps == 0:
+                train_metrics = evaluate(model, loss_fn, meta_train_classes,
+                                         task_lr, task_type, metrics, params,
+                                         'train')
+                test_metrics = evaluate(model, loss_fn, meta_test_classes,
+                                        task_lr, task_type, metrics, params,
+                                        'test')
+
+                train_loss = train_metrics['loss']
+                test_loss = test_metrics['loss']
+                train_acc = train_metrics['accuracy']
+                test_acc = test_metrics['accuracy']
+
+                is_best = test_acc >= best_test_acc
+
+                # Save weights
+                utils.save_checkpoint({
+                    'episode': episode + 1,
+                    'state_dict': model.state_dict(),
+                    'optim_dict': meta_optimizer.state_dict()
+                },
+                                      is_best=is_best,
+                                      checkpoint=model_dir)
+
+                # If best_test, best_save_path
+                if is_best:
+                    logging.info("- Found new best accuracy")
+                    best_test_acc = test_acc
+
+                    # Save best test metrics in a json file in the model directory
+                    best_train_json_path = os.path.join(
+                        model_dir, "metrics_train_best_weights.json")
+                    utils.save_dict_to_json(train_metrics,
+                                            best_train_json_path)
+                    best_test_json_path = os.path.join(
+                        model_dir, "metrics_test_best_weights.json")
+                    utils.save_dict_to_json(test_metrics, best_test_json_path)
+
+                # Save latest test metrics in a json file in the model directory
+                last_train_json_path = os.path.join(
+                    model_dir, "metrics_train_last_weights.json")
+                utils.save_dict_to_json(train_metrics, last_train_json_path)
+                last_test_json_path = os.path.join(
+                    model_dir, "metrics_test_last_weights.json")
+                utils.save_dict_to_json(test_metrics, last_test_json_path)
+
+                plot_history['train_loss'].append(train_loss)
+                plot_history['train_acc'].append(train_acc)
+                plot_history['test_loss'].append(test_loss)
+                plot_history['test_acc'].append(test_acc)
+
+                t.set_postfix(
+                    tr_acc='{:05.3f}'.format(train_acc),
+                    te_acc='{:05.3f}'.format(test_acc),
+                    tr_loss='{:05.3f}'.format(train_loss),
+                    te_loss='{:05.3f}'.format(test_loss))
+                print('\n')
+
+            t.update()
+
+    utils.plot_training_results(args.model_dir, plot_history)
+
+def train_and_evaluate_newton(model,
+                       meta_train_classes,
+                       meta_test_classes,
+                       task_type,
+                       meta_optimizer,
+                       loss_fn,
+                       metrics,
+                       params,
+                       model_dir,
+                       restore_file=None):
+    """
+    Train the model and evaluate every `save_summary_steps`.
+
+    Args:
+        model: (MetaLearner) a meta-learner for MAML algorithm
+        meta_train_classes: (list) the classes for meta-training
+        meta_train_classes: (list) the classes for meta-testing
+        task_type: (subclass of FewShotTask) a type for generating tasks
+        meta_optimizer: (torch.optim) an meta-optimizer for MetaLearner
+        loss_fn: a loss function
+        metrics: (dict) a dictionary of functions that compute a metric using
+                 the output and labels of each batch
+        params: (Params) hyperparameters
+        model_dir: (string) directory containing config, weights and log
+        restore_file: (string) optional- name of file to restore from
+                      (without its extension .pth.tar)
+    TODO Validation classes
+    """
+    # reload weights from restore_file if specified
+    if restore_file is not None:
+        restore_path = os.path.join(args.model_dir,
+                                    args.restore_file + '.pth.tar')
+        logging.info("Restoring parameters from {}".format(restore_path))
+        utils.load_checkpoint(restore_path, model, meta_optimizer)
+
+    # params information
+    num_classes = params.num_classes
+    num_samples = params.num_samples
+    num_query = params.num_query
+    num_inner_tasks = params.num_inner_tasks
+    task_lr = params.task_lr
+    meta_lr = params.meta_lr
+
+    # TODO validation accuracy
+    best_test_acc = 0.0
+
+    # For plotting to see summerized training procedure
+    plot_history = {
+        'train_loss': [],
+        'train_acc': [],
+        'test_loss': [],
+        'test_acc': []
+    }
+
+    with tqdm(total=params.num_episodes) as t:
+        for episode in range(params.num_episodes):
+            # Run one episode
+            logging.info("Episode {}/{}".format(episode + 1,
+                                                params.num_episodes))
+
+            # Run inner loops to get adapted parameters (theta_t`)
+            adapted_state_dicts = []
+            dataloaders_list = []
+            for n_task in range(num_inner_tasks):
+                task = task_type(meta_train_classes, num_classes, num_samples,
+                                 num_query)
+                dataloaders = fetch_dataloaders(['train', 'test', 'meta'],
+                                                task)
+                # Perform a gradient descent to meta-learner on the task
+                a_dict = train_single_task(model, task_lr, loss_fn,
+                                           dataloaders, params)
+                # Store adapted parameters
+                # Store dataloaders for meta-update and evaluation
+                adapted_state_dicts.append(a_dict)
+                dataloaders_list.append(dataloaders)
+
+
+            # compute outer update directions
+            # 1. grad of updated parameters -> v
+            # 2. grad of (nabla^2 J * U * v)
+            # 3. conjugate gradient to compute H^-1 * (2.)
+            directions = []
+            for n_task in range(num_inner_tasks):
+                dataloaders = dataloaders_list[n_task]
+                dl_meta = dataloaders['meta']
+                X_meta, Y_meta = dl_meta.__iter__().next()
+                if params.cuda:
+                    X_meta, Y_meta = X_meta.cuda(async=True), Y_meta.cuda(
+                        async=True)
+                # 1. grad of updated parameters -> grad_t
+                a_dict = adapted_state_dicts[n_task]
+                Y_meta_hat = model(X_meta, a_dict)
+                loss_t = loss_fn(Y_meta_hat, Y_meta)
+                grad_t = torch.autograd.grad(loss_t, a_dict.values())
+
+                # 2. grad of (nabla^2 J * U * v)
+                Y_meta_hat_before = model(X_meta)
+                loss_t_before = loss_fn(Y_meta_hat_before, Y_meta)
+                grad_t_before = torch.autograd.grad(loss_t_before, model.parameters(), create_graph=True)
+                g_u = torch.sum([torch.dot(g,u) for g,u in zip(a_dict, grad_t_before)])
+                grad_grad_u = torch.autograd.grad(g_u, model.parameters(), create_graph=True)
+                grad_grad_uv = torch.sum([torch.dot(g * v) for g,v in zip(grad_grad_u, grad_t)])
+                v_t = torch.autograd.grad(grad_grad_uv, model.parameters())
+                v_t = torch.cat([grad.view(-1) for grad in v_t]).data
+
+                # 3. conjugate gradient to compute H^-1 * (2.)
+                def Hvp(v, damping=1e-1):
+                    flat_gb = torch.cat([g.view(-1) for g in grad_t_before]).data
+                    gv = (flat_gb * Variable(v)).sum()
+                    Hv = torch.autograd.grad(gv, model.parameters())
+                    flat_Hv = torch.cat([Hv.contiguous().view(-1) for grad in Hv]).data
+                    return flat_Hv + v * damping
+
+                H_v = utils.unflatten(conjugate_gradients(Hvp, v_t, 10), model.parameters())
+                d_t = (1 - task_lr) * grad_t + H_v
+                directions.append(d_t)
+
+            # Meta-update
+            cur_params = utils.get_flat_params_from(model)
+            updated_params = cur_params - directions * meta_lr
+            utils.set_flat_params_to(updated_params)
 
             # Evaluate model on new task
             # Evaluate on train and test dataset given a number of tasks (params.num_steps)

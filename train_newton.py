@@ -35,7 +35,7 @@ parser.add_argument(
           reload before training")  # 'best' or 'train'
 
 def conjugate_gradients(Avp, b, nsteps, residual_tol=1e-10):
-    x = torch.zeros(b.size())
+    x = torch.zeros(b.size()).cuda()
     r = b.clone()
     p = b.clone()
     rdotr = torch.dot(r, r)
@@ -161,13 +161,13 @@ def train_single_task_newton(model, task_lr, loss_fn, dataloaders, params):
     # loss.backward(create_graph=True)
     zero_grad(model.parameters())
     grads = torch.autograd.grad(loss, model.parameters(), create_graph=True)
+    grads = utils.flatten(grads)
     loss_grad = torch.cat([grad.view(-1) for grad in grads]).data
 
     def Hvp(v, damping=1e-1):
-        gv = (loss_grad * Variable(v)).sum()
-        Hv = torch.autograd.grad(gv, model.parameters())
-        flat_Hv = torch.cat([Hv.contiguous().view(-1) for grad in Hv]).data
-
+        gv = (grads * Variable(v)).sum()
+        Hv = torch.autograd.grad(gv, model.parameters(), retain_graph=True)
+        flat_Hv = torch.cat([grad.contiguous().view(-1) for grad in Hv]).data
         return flat_Hv + v * damping
 
     newton_step = utils.unflatten(conjugate_gradients(Hvp, loss_grad, 10), model.parameters())
@@ -415,7 +415,7 @@ def train_and_evaluate_newton(model,
                 dataloaders = fetch_dataloaders(['train', 'test', 'meta'],
                                                 task)
                 # Perform a gradient descent to meta-learner on the task
-                a_dict = train_single_task(model, task_lr, loss_fn,
+                a_dict = train_single_task_newton(model, task_lr, loss_fn,
                                            dataloaders, params)
                 # Store adapted parameters
                 # Store dataloaders for meta-update and evaluation
@@ -439,6 +439,7 @@ def train_and_evaluate_newton(model,
                 a_dict = adapted_state_dicts[n_task]
                 Y_meta_hat = model(X_meta, a_dict)
                 loss_t = loss_fn(Y_meta_hat, Y_meta)
+                print([a.requires_grad for a in a_dict.values()])
                 grad_t = torch.autograd.grad(loss_t, a_dict.values())
 
                 # 2. grad of (nabla^2 J * U * v)
@@ -584,6 +585,6 @@ if __name__ == '__main__':
 
     # Train the model
     logging.info("Starting training for {} episode(s)".format(num_episodes))
-    train_and_evaluate(model, meta_train_classes, meta_test_classes, task_type,
+    train_and_evaluate_newton(model, meta_train_classes, meta_test_classes, task_type,
                        meta_optimizer, loss_fn, model_metrics, params,
                        args.model_dir, args.restore_file)
