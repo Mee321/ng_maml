@@ -439,28 +439,37 @@ def train_and_evaluate_newton(model,
                 a_dict = adapted_state_dicts[n_task]
                 Y_meta_hat = model(X_meta, a_dict)
                 loss_t = loss_fn(Y_meta_hat, Y_meta)
-                print([a.requires_grad for a in a_dict.values()])
-                grad_t = torch.autograd.grad(loss_t, a_dict.values())
+                params_g = []
+                for a in a_dict.values():
+                    if a.requires_grad:
+                        params_g.append(a)
+                grad_t = torch.autograd.grad(loss_t, params_g)
 
                 # 2. grad of (nabla^2 J * U * v)
                 Y_meta_hat_before = model(X_meta)
                 loss_t_before = loss_fn(Y_meta_hat_before, Y_meta)
                 grad_t_before = torch.autograd.grad(loss_t_before, model.parameters(), create_graph=True)
-                g_u = torch.sum([torch.dot(g,u) for g,u in zip(a_dict, grad_t_before)])
-                grad_grad_u = torch.autograd.grad(g_u, model.parameters(), create_graph=True)
-                grad_grad_uv = torch.sum([torch.dot(g * v) for g,v in zip(grad_grad_u, grad_t)])
-                v_t = torch.autograd.grad(grad_grad_uv, model.parameters())
+                for g in params_g:
+                    g = g.detach()
+                sum_grad = 0
+                for g, u in zip(params_g, grad_t_before):
+                    sum_grad += torch.dot(g.view(-1),u.view(-1))
+                grad_grad_u = torch.autograd.grad(sum_grad, model.parameters(), create_graph=True)
+                sum_grad = 0
+                for g,v in zip(grad_grad_u, grad_t):
+                    sum_grad += torch.dot(g.view(-1), v.view(-1))
+                v_t = torch.autograd.grad(sum_grad, model.parameters())
                 v_t = torch.cat([grad.view(-1) for grad in v_t]).data
 
                 # 3. conjugate gradient to compute H^-1 * (2.)
                 def Hvp(v, damping=1e-1):
-                    flat_gb = torch.cat([g.view(-1) for g in grad_t_before]).data
+                    flat_gb = utils.flatten(grad_t_before)
                     gv = (flat_gb * Variable(v)).sum()
-                    Hv = torch.autograd.grad(gv, model.parameters())
-                    flat_Hv = torch.cat([Hv.contiguous().view(-1) for grad in Hv]).data
+                    HVP = torch.autograd.grad(gv, model.parameters(), retain_graph=True)
+                    flat_Hv = torch.cat([g.contiguous().view(-1) for g in HVP]).data
                     return flat_Hv + v * damping
 
-                H_v = utils.unflatten(conjugate_gradients(Hvp, v_t, 10), model.parameters())
+                H_v = conjugate_gradients(Hvp, v_t, 10)
                 d_t = (1 - task_lr) * grad_t + H_v
                 directions.append(d_t)
 
