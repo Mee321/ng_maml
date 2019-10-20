@@ -21,7 +21,7 @@ def unflatten(grads, params):
 def flatten(grads):
     flat_grads = []
     for g in grads:
-        flat_grads.append(g.view(-1))
+        flat_grads.append(g.contiguous().view(-1))
     return torch.cat(flat_grads)
 
 def get_flat_params_from(model):

@@ -440,16 +440,17 @@ def train_and_evaluate_newton(model,
                 Y_meta_hat = model(X_meta, a_dict)
                 loss_t = loss_fn(Y_meta_hat, Y_meta)
                 params_g = []
+                # differentiable parameters
                 for a in a_dict.values():
                     if a.requires_grad:
                         params_g.append(a)
                 grad_t = torch.autograd.grad(loss_t, params_g)
 
-                # 2. grad of (nabla^2 J * U * v)
+                # 2. grad of (nabla^2 J * u * v)
                 Y_meta_hat_before = model(X_meta)
                 loss_t_before = loss_fn(Y_meta_hat_before, Y_meta)
                 grad_t_before = torch.autograd.grad(loss_t_before, model.parameters(), create_graph=True)
-                for g in params_g:
+                for g in params_g: # u
                     g = g.detach()
                 sum_grad = 0
                 for g, u in zip(params_g, grad_t_before):
@@ -462,21 +463,25 @@ def train_and_evaluate_newton(model,
                 v_t = torch.cat([grad.view(-1) for grad in v_t]).data
 
                 # 3. conjugate gradient to compute H^-1 * (2.)
+                def get_grad():
+                    Y_before = model(X_meta)
+                    loss_before = loss_fn(Y_before, Y_meta)
+                    grad_before = torch.autograd.grad(loss_before, model.parameters(), create_graph=True)
+                    return grad_before
                 def Hvp(v, damping=1e-1):
-                    flat_gb = utils.flatten(grad_t_before)
+                    flat_gb = utils.flatten(get_grad())
                     gv = (flat_gb * Variable(v)).sum()
-                    HVP = torch.autograd.grad(gv, model.parameters(), retain_graph=True)
-                    flat_Hv = torch.cat([g.contiguous().view(-1) for g in HVP]).data
+                    Hv = torch.autograd.grad(gv, model.parameters())
+                    flat_Hv = torch.cat([g.contiguous().view(-1) for g in Hv]).data
                     return flat_Hv + v * damping
-
                 H_v = conjugate_gradients(Hvp, v_t, 10)
-                d_t = (1 - task_lr) * grad_t + H_v
+                d_t = (1 - task_lr) * utils.flatten(grad_t).data + H_v
                 directions.append(d_t)
 
             # Meta-update
             cur_params = utils.get_flat_params_from(model)
-            updated_params = cur_params - directions
-            utils.set_flat_params_to(updated_params)
+            updated_params = cur_params - d_t
+            utils.set_flat_params_to(model, updated_params)
 
             # Evaluate model on new task
             # Evaluate on train and test dataset given a number of tasks (params.num_steps)
