@@ -481,7 +481,7 @@ def train_and_evaluate_newton(model,
             # Meta-update
             direction = directions / num_inner_tasks
             cur_params = utils.get_flat_params_from(model)
-            updated_params = cur_params - direction
+            updated_params = cur_params - direction * meta_lr
             utils.set_flat_params_to(model, updated_params)
 
             # Evaluate model on new task
