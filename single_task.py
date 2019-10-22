@@ -349,7 +349,7 @@ if __name__ == '__main__':
                                    task)
     for i in range(1000):
         # Perform a gradient descent to meta-learner on the task
-        a_dict = train_single_task(model, params.task_lr, loss_fn,
+        a_dict = train_single_task_newton(model, params.task_lr, loss_fn,
                                    dataloader, params)
         updated_params = []
         for p in a_dict.values():
