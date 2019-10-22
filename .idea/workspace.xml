@@ -214,7 +214,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.single_task (1)">
+  <component name="RunManager" selected="Python.regression_maml">
     <configuration name="regression_maml" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="MAML-in-pytorch-master" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -327,8 +327,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.single_task (1)" />
         <item itemvalue="Python.regression_maml" />
+        <item itemvalue="Python.single_task (1)" />
         <item itemvalue="Python.single_task" />
         <item itemvalue="Python.train_newton" />
         <item itemvalue="Python.train" />
@@ -409,7 +409,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/MAML_in_pytorch_master$train_newton.coverage" NAME="train_newton Coverage Results" MODIFIED="1571582923711" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MAML_in_pytorch_master$train.coverage" NAME="train Coverage Results" MODIFIED="1571403372797" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MAML_in_pytorch_master$regression_maml.coverage" NAME="regression_maml Coverage Results" MODIFIED="1571752105284" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/logistic_regression" />
+    <SUITE FILE_PATH="coverage/MAML_in_pytorch_master$regression_maml.coverage" NAME="regression_maml Coverage Results" MODIFIED="1571755016380" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/logistic_regression" />
     <SUITE FILE_PATH="coverage/MAML_in_pytorch_master$single_task.coverage" NAME="single_task Coverage Results" MODIFIED="1571741312652" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MAML_in_pytorch_master$single_task__1_.coverage" NAME="single_task (1) Coverage Results" MODIFIED="1571754875733" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/logistic_regression" />
   </component>

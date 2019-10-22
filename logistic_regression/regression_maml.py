@@ -299,7 +299,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-sgd', action='store_true', default='False')
 args = parser.parse_args()
 
-if args.n:
+if args.sgd:
     meta_lr = 1e-2
     train_and_evaluate_newton(model, criterion)
 else:
