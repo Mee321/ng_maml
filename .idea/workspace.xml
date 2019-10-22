@@ -84,8 +84,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/logistic_regression/regression_maml.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="504">
-              <caret line="296" column="18" selection-start-line="296" selection-start-column="18" selection-end-line="296" selection-end-column="18" />
+            <state relative-caret-position="841">
+              <caret line="297" column="18" lean-forward="true" selection-start-line="297" selection-start-column="18" selection-end-line="297" selection-end-column="18" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
                 <element signature="e#97#1114#0" />
@@ -331,12 +331,12 @@
       <workItem from="1571558961247" duration="5545000" />
       <workItem from="1571578585442" duration="54000" />
       <workItem from="1571578660135" duration="12951000" />
-      <workItem from="1571706676290" duration="19760000" />
+      <workItem from="1571706676290" duration="20604000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="53788000" />
+    <option name="totallyTimeSpent" value="54632000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="25" width="2560" height="1415" extended-state="6" />
@@ -347,7 +347,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32858273" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.37668517" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.37668517" />
       <window_info anchor="bottom" id="Terminal" order="3" weight="0.29896906" />
       <window_info anchor="bottom" id="Debug" order="4" weight="0.40126884" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
@@ -383,7 +383,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/MAML_in_pytorch_master$train_newton.coverage" NAME="train_newton Coverage Results" MODIFIED="1571582923711" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/MAML_in_pytorch_master$train.coverage" NAME="train Coverage Results" MODIFIED="1571403372797" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/MAML_in_pytorch_master$regression_maml.coverage" NAME="regression_maml Coverage Results" MODIFIED="1571751303218" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/logistic_regression" />
+    <SUITE FILE_PATH="coverage/MAML_in_pytorch_master$regression_maml.coverage" NAME="regression_maml Coverage Results" MODIFIED="1571752105284" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/logistic_regression" />
     <SUITE FILE_PATH="coverage/MAML_in_pytorch_master$single_task.coverage" NAME="single_task Coverage Results" MODIFIED="1571741312652" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="debuggerHistoryManager">
@@ -620,8 +620,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/logistic_regression/regression_maml.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="296" column="18" selection-start-line="296" selection-start-column="18" selection-end-line="296" selection-end-column="18" />
+        <state relative-caret-position="841">
+          <caret line="297" column="18" lean-forward="true" selection-start-line="297" selection-start-column="18" selection-end-line="297" selection-end-column="18" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
             <element signature="e#97#1114#0" />

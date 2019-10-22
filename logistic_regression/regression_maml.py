@@ -7,6 +7,7 @@ import copy
 from collections import OrderedDict
 from torch.autograd import Variable
 import utils
+import argparse
 
 class task_generator():
     def __init__(self, num_classes, num_support, n_dim=10, scale_mean=1.0, scale_std=0.01):
@@ -289,11 +290,14 @@ n_dim = 10 # dim of space
 model = Linear(n_dim=n_dim, n_class=num_classes)
 criterion = nn.CrossEntropyLoss()
 
-mode = 'newton' # or 'sgd'
-if mode is 'newton':
+parser = argparse.ArgumentParser()
+parser.add_argument('-sgd', action='store_true', default='False')
+args = parser.parse_args()
+
+if args.n:
     meta_lr = 1e-2
     train_and_evaluate_newton(model, criterion)
-elif mode is 'sgd':
+else:
     meta_lr = 3e-4
     optimizer = torch.optim.Adam(model.parameters(), lr=meta_lr)
     train_and_evaluate(model, optimizer, criterion)
