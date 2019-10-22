@@ -279,8 +279,13 @@ def train_and_evaluate_newton(model, loss_fn):
             _, pred = torch.max(logit, 1)
             acc = (pred == y).sum().float() / len(y)
             print('episode:', episode, 'loss: %.3f' % meta_loss.item(), 'acc: %.2f' % acc.item())
+def set_seed(seed):
+    np.random.seed(seed)
+    torch.random.manual_seed(seed)
+    random.seed(seed)
 
-
+seed = 1
+set_seed(seed)
 num_classes = 10 # num of distributions for each task
 num_samples = 1 # num of samples per distribution for training
 num_inner_tasks = 8 # meta batch size

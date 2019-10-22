@@ -289,9 +289,12 @@ num_eval_updates = 1 # num of gradient steps for evaluation
 n_dim = 10 # dim of space
 model = Linear(n_dim=n_dim, n_class=num_classes)
 criterion = nn.CrossEntropyLoss()
-
-
-
+seed = 1
+def set_seed(seed):
+    np.random.seed(seed)
+    torch.random.manual_seed(seed)
+    random.seed(seed)
+set_seed(seed)
 meta_lr = 1e-2
 acc = []
 for _ in range(100):
