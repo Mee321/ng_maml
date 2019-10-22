@@ -7,10 +7,9 @@ import copy
 from collections import OrderedDict
 
 class task_generator():
-    def __init__(self, num_classes, num_support, num_query, n_dim=10, scale_mean=1.0, scale_std=0.01):
+    def __init__(self, num_classes, num_support, n_dim=10, scale_mean=1.0, scale_std=0.01):
         self.num_classes = num_classes
         self.num_support = num_support
-        self.num_query = num_query
         self.n_dim = n_dim
         self.scale_mean = scale_mean
         self.scale_std = scale_std
@@ -85,19 +84,12 @@ def train_and_evaluate(model,
                        meta_optimizer,
                        loss_fn):
 
-    num_classes = 10
-    num_samples = 1
-    num_query = 10
-    num_inner_tasks = 8
-    task_lr = 0.1
-    num_eval_updates = 3
-
     for episode in range(100000):
         # Run inner loops to get adapted parameters (theta_t`)
         adapted_state_dicts = []
         dataloaders_list = []
         for n_task in range(num_inner_tasks):
-            generator = task_generator(num_classes, num_samples, num_query)
+            generator = task_generator(num_classes, num_samples, n_dim=n_dim)
             # Perform a gradient descent to meta-learner on the task
             a_dict = train_single_task(model, task_lr, loss_fn,
                                        generator, 1)
@@ -124,7 +116,7 @@ def train_and_evaluate(model,
         # Evaluate model on new task
         # Evaluate on train and test dataset given a number of tasks (params.num_steps)
         if episode % 100 == 0:
-            test_g = task_generator(num_classes, num_samples, num_query)
+            test_g = task_generator(num_classes, num_samples, n_dim=n_dim)
             x,y = test_g.get_batch()
             net_clone = copy.deepcopy(model)
             optim = torch.optim.SGD(net_clone.parameters(), lr=task_lr)
@@ -139,10 +131,16 @@ def train_and_evaluate(model,
             acc = (pred == y).sum().float() / len(y)
             print('episode:', episode, 'loss: %.3f' % meta_loss.item(), 'acc: %.2f' % acc.item())
 
-num_classes = 10
-model = Linear(n_dim=10, n_class=num_classes)
+num_classes = 10 # num of distributions for each task
+num_samples = 1 # num of samples per distribution for training
+num_inner_tasks = 8 # meta batch size
+task_lr = 0.1 # inner lr
+meta_lr = 3e-4
+num_eval_updates = 3 # num of gradient steps for evaluation
+n_dim = 10 # dim of space
+model = Linear(n_dim=n_dim, n_class=num_classes)
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=meta_lr)
 train_and_evaluate(model, optimizer, criterion)
 
 
