@@ -300,13 +300,11 @@ parser.add_argument('-sgd', action='store_true', default='False')
 args = parser.parse_args()
 
 if args.sgd:
-    meta_lr = 1e-2
-    train_and_evaluate_newton(model, criterion)
-else:
     meta_lr = 3e-4
     optimizer = torch.optim.Adam(model.parameters(), lr=meta_lr)
     train_and_evaluate(model, optimizer, criterion)
-
-
+else:
+    meta_lr = 1e-2
+    train_and_evaluate_newton(model, criterion)
 
 

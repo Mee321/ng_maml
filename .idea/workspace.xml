@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c63e8475-75e3-481a-84b9-ce20a16e122a" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/logistic_regression/regression_maml.py" beforeDir="false" afterPath="$PROJECT_DIR$/logistic_regression/regression_maml.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logistic_regression/single_task.py" beforeDir="false" afterPath="$PROJECT_DIR$/logistic_regression/single_task.py" afterDir="false" />
-    </list>
+    <list default="true" id="c63e8475-75e3-481a-84b9-ce20a16e122a" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,8 +81,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/logistic_regression/regression_maml.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-65">
-              <caret line="287" column="14" lean-forward="true" selection-start-line="287" selection-start-column="14" selection-end-line="287" selection-end-column="14" />
+            <state relative-caret-position="395">
+              <caret line="307" column="46" selection-start-line="307" selection-start-column="46" selection-end-line="307" selection-end-column="46" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -357,16 +354,15 @@
       <workItem from="1571578585442" duration="54000" />
       <workItem from="1571578660135" duration="12951000" />
       <workItem from="1571706676290" duration="20604000" />
-      <workItem from="1571754160494" duration="806000" />
+      <workItem from="1571754160494" duration="1679000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="55438000" />
+    <option name="totallyTimeSpent" value="56311000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="25" width="2560" height="1415" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.27605408" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -656,8 +652,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/logistic_regression/regression_maml.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-65">
-          <caret line="287" column="14" lean-forward="true" selection-start-line="287" selection-start-column="14" selection-end-line="287" selection-end-column="14" />
+        <state relative-caret-position="395">
+          <caret line="307" column="46" selection-start-line="307" selection-start-column="46" selection-end-line="307" selection-end-column="46" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
